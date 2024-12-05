@@ -44,8 +44,17 @@ __pycache__/
 .vscode/
 .idea/
 
-# Ignore database files
+# Ignore database files and folders
+logotype/
 products.db
+products_NOR.db
+products_A.db
+products_B.db
+products_C.db
+products_D.db
+products_E.db
 
 # Ignore other system files
 Thumbs.db
+.gitignore
+

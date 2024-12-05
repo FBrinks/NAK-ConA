@@ -92,43 +92,73 @@ def create_start_widget():
     shadow.setColor(QColor(63, 63, 63, 180))
     welcome_text.setGraphicsEffect(shadow)
     
+    # Set welcome text, and i kept a class for the logo image but i removed it for now but kept the style
     info_text = """
-    Welcome to Content Assistant!
-
-    Any questions or feedback or issues can be sent to: fredde.brink@outlook.com
-    You who work within the company can also reach me on Teams.
-
-    This application provides several useful tools:
-
-    1. Excel Processing
-       • Export an item-list from pim
-       • Use english as language
-       • Use the attributes: Product/Item Number, Brand, Product name, Product, Supplier Product No, External color code,
-       • Removes duplicates and cleans data
-       • Combines supplier product numbers with external color codes for image search in content banks
-       • Use TEXTJOIN in the saved Excel for usage in Info Search and Image Search/Processing
-
-    2. Info Search
-       • Insert as many search_terms as you like for search in files and extract the information
-       • Adds the information to a local database for easy access
-       • Generates Product texts for the products in the database
-
-    3. Image Search and Processing
-       • Search for images in folders and subfolders and process them
-       • Convert and resize images
-
-       NOTE: Cropping and Changing non-white backgrounds to white is not implemented yet. 
-       although transparent PNG are handled and converted to white background.
-
-    4. Database View
-       • View and manage database entries
-       • Get a pop up window with  the information for the selected product, where you also can edit the information
-       • Search and filter database content
-
-    Select any function from the buttons above to get started.
+        <style>
+        .logo-image {
+            width: 50px;
+            height: auto;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        </style>
+        <table>
+            <tr>
+                <td>
+                    <br>
+                    <br>
+                    <h2>Welcome to <b>Conrad</b></h2>
+                </td>
+            </tr>
+        </table>
+        
+        <p style="font-size:14px;">
+            Conrad is your <b>content organizer</b> and <b>research assistant</b> for product enrichment.
+        </p>
+        <p style="font-size:13px;">
+            If you have any <b>questions</b>, <b>feedback</b>, or <b>issues</b>, feel free to reach out to:
+            <br><b>Email:</b> <a href='mailto:fredde.brink@outlook.com'>fredde.brink@outlook.com</a>
+            <br><b>Teams:</b> Contact me directly within the company.
+        </p>
+        
+        <h3 style="color:#2c3e50;">Key Features</h3>
+        
+        <h4>1. Excel Processing</h4>
+        <ul style="font-size:13px;">
+            <li>Export an item list from PIM using <b>English</b> as the language.</li>
+            <li>Supports attributes: Product/Item Number, Brand, Product Name, Product, Supplier Product No, External Color Code.</li>
+            <li>Removes duplicates and cleans data automatically.</li>
+            <li>Combines supplier product numbers with external color codes for image searches in content banks.</li>
+            <li>Utilizes <b>TEXTJOIN</b> in Excel for seamless Info Search and Image Search/Processing.</li>
+        </ul>
+        
+        <h4>2. Info Search</h4>
+        <ul style="font-size:13px;">
+            <li>Insert multiple <b>search terms</b> to scan files and extract information.</li>
+            <li>Adds information to a local database for easy access.</li>
+            <li>Generates SEO-optimized <b>product texts</b> for database entries.</li>
+        </ul>
+        
+        <h4>3. Image Search and Processing</h4>
+        <ul style="font-size:13px;">
+            <li>Search for images in folders and subfolders and process them effortlessly.</li>
+            <li>Convert and resize images to meet your needs.</li>
+            <li style="color:#e74c3c;"><b>Note:</b> Cropping and background color changes are not yet implemented, but transparent PNGs are supported and converted to white backgrounds.</li>
+        </ul>
+        
+        <h4>4. Database View</h4>
+        <ul style="font-size:13px;">
+            <li>View and manage database entries seamlessly.</li>
+            <li>Pop-up windows for editing and viewing product information in detail.</li>
+            <li>Search and filter content to find what you need quickly.</li>
+        </ul>
+        
+        <p style="font-size:14px; font-weight:bold; color:#3498db;">
+            Select a function from the buttons above to get started.
+        </p>
     """
     
-    welcome_text.setText(info_text)
+    welcome_text.setHtml(info_text)
     layout.addWidget(welcome_text)
     
     return start_widget
@@ -136,7 +166,7 @@ def create_start_widget():
 def main():
     app = QApplication([])
     window = QWidget()
-    window.setWindowTitle('Content Assistant')
+    window.setWindowTitle('Conrad - Content assistant')
     
     # Create layouts
     main_layout = QVBoxLayout(window)
