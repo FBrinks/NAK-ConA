@@ -38,13 +38,23 @@ def search_excel(df, search_term):
                 search_term_result.append(cleaned_values)
                 
         if not search_term_result:
-            search_terms_not_found.append(search_term)                
+            search_terms_not_found.append(search_term)
+            return {
+                "search_term_result": [],
+                "keywords_not_found": search_terms_not_found,
+                "search_interrupted": True  # New flag to signal interruption
+            }
 
         return {
             "search_term_result": search_term_result,
-            "keywords_not_found": search_terms_not_found
+            "keywords_not_found": search_terms_not_found,
+            "search_interrupted": False
         }
 
     except Exception as e:
         print(f"search_excel: Error processing DataFrame: {e}")
-        return {"extracted_data": [], "keywords_not_found": search_term}
+        return {
+            "search_term_result": [],
+            "keywords_not_found": [search_term],
+            "search_interrupted": True
+        }

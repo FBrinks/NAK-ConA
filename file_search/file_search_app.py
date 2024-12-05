@@ -145,10 +145,19 @@ class FileSearchApp(BaseProcessingWidget):
 
         try:
             if extension in ['xlsx', 'xls']:
+                # Read Excel file and search for the search terms. If a search term is found, add the row to the search term result
+                # If a search term is not found, add the search term to the search_terms_not_found list. 
+                # I do not send the search term who was not found to AI for analysis or for updating the database. 
                 df = pd.read_excel(file_path, engine='openpyxl', na_filter=False)
                 for search_term in search_group.split(','):
                     search_term_result = self.search_excel(df, search_term.strip())
                     print(f"FileSearchApp open app recieved search_term_result from search_excel: {search_term_result}")
+                    # If the search was interrupted, skip the analysis and database update
+                    if search_term_result.get("search_interrupted"):
+                        self.update_listbox(f"{search_term.strip()} not found in Excel, continuing to next search term.")
+                        continue
+
+                    # Analyze the search term result and update the database
                     self.analyze_and_update_db(search_term.strip(), search_term_result)
                     print(f"FilesearchApp parsed and updated database for search_term: {search_term.strip()}")
                     search_term_results.append((search_term.strip(), search_term_result))

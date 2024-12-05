@@ -50,6 +50,8 @@ class DatabaseQueryHandler:
 
     def search_products(self, keyword):
         columns = get_table_columns()
+        if 'row_id' in columns:
+            columns.remove('row_id')
         conditions = " OR ".join([f"{column} LIKE ?" for column in columns])
         query = f"SELECT {', '.join(columns)} FROM products WHERE {conditions}"
         params = ['%' + keyword + '%'] * len(columns)
@@ -276,10 +278,11 @@ class DatabaseViewWidget(QWidget):
             self.table.setRowCount(len(products))
             for row_idx, product in enumerate(products):
                 for col_idx, value in enumerate(product):
-                    item = QTableWidgetItem(str(value))
-                    if col_idx == 0:
-                        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                    self.table.setItem(row_idx, col_idx, item)
+                    if col_idx < len(self.columns):
+                        item = QTableWidgetItem(str(value))
+                        if self.columns[col_idx] == 'search_term':
+                            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                        self.table.setItem(row_idx, col_idx, item)
             
             if not products:
                 QMessageBox.information(self, "Search Results", "No products found matching your search.")
