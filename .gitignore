@@ -54,7 +54,11 @@ products_C.db
 products_D.db
 products_E.db
 
+openaiProductTexts.py
+
 # Ignore other system files
 Thumbs.db
 .gitignore
+.DS_Store
+.flake8
 

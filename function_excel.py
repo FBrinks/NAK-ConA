@@ -5,7 +5,15 @@ import platform
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Alignment
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit
+from PyQt5.QtWidgets import (
+    QFileDialog,
+    QMessageBox,
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QLineEdit,
+)
 
 # Color mapping
 color_mapping = {
@@ -13,8 +21,9 @@ color_mapping = {
     "red": "FF0000",
     "green": "00FF00",
     "grey": "808080",
-    "purple": "800080"
+    "purple": "800080",
 }
+
 
 def open_file(file_path):
     if platform.system() == "Windows":
@@ -24,13 +33,17 @@ def open_file(file_path):
     else:
         print("Error: Unsupported OS. Cannot open file.")
 
+
 def load_and_process_excel(file_path):
     df = pd.read_excel(file_path)
     print("Excel file loaded successfully.")
     return df
 
-def map_columns(df, columns_mapping): # Map the columns in the DataFrame to the standard column names
-    """ Map the columns in the DataFrame to the standard column names """
+
+def map_columns(
+    df, columns_mapping
+):  # Map the columns in the DataFrame to the standard column names
+    """Map the columns in the DataFrame to the standard column names"""
     selected_columns = {}
     for standard_name, possible_names in columns_mapping.items():
         for name in possible_names:
@@ -40,10 +53,16 @@ def map_columns(df, columns_mapping): # Map the columns in the DataFrame to the 
     print(f"Found columns: {selected_columns}")
     return selected_columns
 
-def clean_external_color_code(df): # Remove special characters from 'External color code'
-    df["External color code"] = df["External color code"].astype(str).apply(lambda x: re.sub(r"[*-]", "", x))
+
+def clean_external_color_code(
+    df,
+):  # Remove special characters from 'External color code'
+    df["External color code"] = (
+        df["External color code"].astype(str).apply(lambda x: re.sub(r"[*-]", "", x))
+    )
     print("Cleaned 'External color code' values:")
     print(df["External color code"].head().to_string(index=False))
+
 
 def create_imagebank_search_column(row, brand_name, supplier_no_handler, combiner):
     if row["Brand"] == brand_name:
@@ -51,67 +70,93 @@ def create_imagebank_search_column(row, brand_name, supplier_no_handler, combine
         return combiner(modified_supplier_no, row["External color code"])
     return None
 
-def process_imagebank_search(df, ws): # Apply Brand-specific logic to create 'Imagebank search' column
+
+def process_imagebank_search(
+    df, ws
+):  # Apply Brand-specific logic to create 'Imagebank search' column
     brand_handlers = {
-       "The North Face": {
-              "supplier_no_handler": lambda x: x[4:], # Remove first 4 characters
-              "combiner": lambda supplier_no, color_code: supplier_no + color_code # Combine supplier number and color code
-       },
-       "Marmot": {
-                "supplier_no_handler": lambda x: x[1:] if x and x[0].lower() == 'm' else x, # Remove first character
-                "combiner": lambda supplier_no, color_code: f'"{supplier_no}-{color_code}"' # Combine supplier number and color code
-       },
+        "The North Face": {
+            "supplier_no_handler": lambda x: x[4:],  # Remove first 4 characters
+            "combiner": lambda supplier_no, color_code: supplier_no
+            + color_code,  # Combine supplier number and color code
+        },
+        "Marmot": {
+            "supplier_no_handler": lambda x: x[1:]
+            if x and x[0].lower() == "m"
+            else x,  # Remove first character
+            "combiner": lambda supplier_no, color_code: f'"{supplier_no}-{color_code}"',  # Combine supplier number and color code
+        },
     }
-   
+
     combined_search_values = []
     for brand_name, handlers in brand_handlers.items():
-       if df["Brand"].str.contains(brand_name).any():
-           print(f"'{brand_name}' found in 'Brand' column. Processing 'Imagebank search' column.")
-           df["Imagebank search"] = df.apply(
-               create_imagebank_search_column,
+        if df["Brand"].str.contains(brand_name).any():
+            print(
+                f"'{brand_name}' found in 'Brand' column. Processing 'Imagebank search' column."
+            )
+            df["Imagebank search"] = df.apply(
+                create_imagebank_search_column,
                 axis=1,
                 brand_name=brand_name,
                 supplier_no_handler=handlers["supplier_no_handler"],
-                combiner=handlers["combiner"]
-        )
-           print(f"'Imagebank search' column processed for '{brand_name}'.")
-           combined_search_values.extend(df["Imagebank search"].dropna().tolist())
-           
+                combiner=handlers["combiner"],
+            )
+            print(f"'Imagebank search' column processed for '{brand_name}'.")
+            combined_search_values.extend(df["Imagebank search"].dropna().tolist())
+
     if combined_search_values:
-        combined_search_values_str = ' '.join(combined_search_values)
+        combined_search_values_str = " ".join(combined_search_values)
         new_column_index = ws.max_column + 1
         ws.cell(row=1, column=new_column_index).value = "Imagebank search"
         ws.cell(row=2, column=new_column_index).value = combined_search_values_str
-        ws.cell(row=1, column=new_column_index).alignment = Alignment(horizontal="center", vertical="center")
-        ws.cell(row=2, column=new_column_index).alignment = Alignment(horizontal="center", vertical="center")
+        ws.cell(row=1, column=new_column_index).alignment = Alignment(
+            horizontal="center", vertical="center"
+        )
+        ws.cell(row=2, column=new_column_index).alignment = Alignment(
+            horizontal="center", vertical="center"
+        )
         print(f"'Imagebank search' column added to the Excel file.")
     else:
-        print(f"No brands found in 'Brand' column. Skipping 'Imagebank search' column processing.")
-               
-           
-def apply_color_fill(ws, color_mapping, s1_s4_columns): # Apply color fill to 'S1', 'S2', 'S3', 'S4' columns
+        print(
+            f"No brands found in 'Brand' column. Skipping 'Imagebank search' column processing."
+        )
+
+
+def apply_color_fill(
+    ws, color_mapping, s1_s4_columns
+):  # Apply color fill to 'S1', 'S2', 'S3', 'S4' columns
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
         for cell in row:
             if ws.cell(row=1, column=cell.column).value in s1_s4_columns:
                 cell_value = str(cell.value).strip().lower()
                 if cell_value in color_mapping:
-                    cell.fill = PatternFill(start_color=color_mapping[cell_value], end_color=color_mapping[cell_value], fill_type="solid")
+                    cell.fill = PatternFill(
+                        start_color=color_mapping[cell_value],
+                        end_color=color_mapping[cell_value],
+                        fill_type="solid",
+                    )
 
-def format_product_item_number(ws): # Format 'Product/item number' column as text
-    for cell in ws['A'][1:]:
-        cell.number_format = '0'
 
-def adjust_column_widths(ws): # Adjust column widths based on the longest value in each column
+def format_product_item_number(ws):  # Format 'Product/item number' column as text
+    for cell in ws["A"][1:]:
+        cell.number_format = "0"
+
+
+def adjust_column_widths(
+    ws,
+):  # Adjust column widths based on the longest value in each column
     for col in ws.columns:
         values = [str(cell.value) for cell in col if cell.value]
         if values:
             max_length = max(len(value) for value in values) + 2
             ws.column_dimensions[col[0].column_letter].width = max_length
 
-def align_cells(ws): # Align cells to center
+
+def align_cells(ws):  # Align cells to center
     for row in ws.iter_rows():
         for cell in row:
             cell.alignment = Alignment(horizontal="center", vertical="center")
+
 
 def process_excel(file_path, save_path):
     try:
@@ -130,11 +175,16 @@ def process_excel(file_path, save_path):
             "External color code": ["External color code", "Extern färgkod"],
         }
         selected_columns = map_columns(df, columns_mapping)
-        new_df = df[selected_columns.values()].rename(columns={v: k for k, v in selected_columns.items()})
+        new_df = df[selected_columns.values()].rename(
+            columns={v: k for k, v in selected_columns.items()}
+        )
         print("Columns selected and renamed.")
-        new_df.drop_duplicates(subset=["Product", "Supplier product no", "External color code"], inplace=True) # Remove duplicates
+        new_df.drop_duplicates(
+            subset=["Product", "Supplier product no", "External color code"],
+            inplace=True,
+        )  # Remove duplicates
         print("Duplicates removed.")
-        clean_external_color_code(new_df) # Clean 'External color code' values
+        clean_external_color_code(new_df)  # Clean 'External color code' values
         new_df.to_excel(save_path, index=False)
         print(f"New Excel file created and saved at {save_path}.")
         wb = load_workbook(save_path)
@@ -150,6 +200,7 @@ def process_excel(file_path, save_path):
     except Exception as e:
         print(f"ERROR! Try again with an exported items-list {e}")
         return False
+
 
 class ExcelProcessingWidget(QWidget):
     def __init__(self):
@@ -230,7 +281,8 @@ class ExcelProcessingWidget(QWidget):
         self.setLayout(layout)
 
     def apply_styles(self):
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QWidget {
                 background-color: #f5f5f5;
                 font-family: Arial;
@@ -278,10 +330,13 @@ class ExcelProcessingWidget(QWidget):
             #process-button:hover {
                 background-color: #27ae60;
             }
-        """)
+        """
+        )
 
     def choose_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select Excel File", "", "Excel files (*.xlsx *.xls)")
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Select Excel File", "", "Excel files (*.xlsx *.xls)"
+        )
         if file_path:
             self.file_path_display.setText(file_path)
 
@@ -294,7 +349,10 @@ class ExcelProcessingWidget(QWidget):
         save_path = os.path.splitext(file_path)[0] + "_ConA.xlsx"
         success = process_excel(file_path, save_path)
         if success:
-            QMessageBox.information(self, "Success", f"File processed and saved successfully as {save_path}.")
+            QMessageBox.information(
+                self,
+                "Success",
+                f"File processed and saved successfully as {save_path}.",
+            )
         else:
             QMessageBox.warning(self, "Error", "Failed to process the file.")
-

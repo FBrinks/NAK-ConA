@@ -1,9 +1,23 @@
-from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QPushButton, QListWidget, 
-                             QFileDialog, QMessageBox, QVBoxLayout, QApplication, QScrollArea, QSizePolicy)
+from PyQt5.QtWidgets import (
+    QWidget,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QListWidget,
+    QFileDialog,
+    QMessageBox,
+    QVBoxLayout,
+    QApplication,
+    QScrollArea,
+    QSizePolicy,
+)
 from PyQt5.QtCore import Qt  # Add this import
 import os
 from widgets.base_widget import BaseProcessingWidget
-from image_handler.image_processing_handler import ImageProcessingHandler  # Import the new handler class
+from image_handler.image_processing_handler import (
+    ImageProcessingHandler,
+)  # Import the new handler class
+
 
 class ImageProcessingWidget(BaseProcessingWidget):
     """A PyQt widget for processing and organizing image files.
@@ -45,10 +59,13 @@ class ImageProcessingWidget(BaseProcessingWidget):
         widget = ImageProcessingWidget()
         widget.show()  # Display the widget in a PyQt application
     """
+
     def __init__(self):
         super().__init__()
         self.not_found_list = []  # Initialize the list for search terms not found
-        self.image_handler = ImageProcessingHandler(self)  # Initialize the image handler
+        self.image_handler = ImageProcessingHandler(
+            self
+        )  # Initialize the image handler
         self.init_ui()
 
     def init_ui(self):
@@ -112,11 +129,11 @@ class ImageProcessingWidget(BaseProcessingWidget):
         # Create search section with spacing
         self.create_search_section()
         self.layout.addSpacing(15)
-        
+
         # Create action buttons
         self.create_buttons()
         self.layout.addSpacing(15)
-        
+
         # Create results section
         self.create_results_section()
 
@@ -126,7 +143,7 @@ class ImageProcessingWidget(BaseProcessingWidget):
             "For multiple products, separate them with semicolons (;)"
         )
         label.setObjectName("section-label")
-        label.setWordWrap(True) # Add this line to enable word wrapping
+        label.setWordWrap(True)  # Add this line to enable word wrapping
         self.layout.addWidget(label)
 
         self.entry = QLineEdit(self)
@@ -138,10 +155,12 @@ class ImageProcessingWidget(BaseProcessingWidget):
         start_button.clicked.connect(self.start_processing)
         self.layout.addWidget(start_button)
 
-        folder_button = QPushButton("Process Folder Images\nClick to select folder", self)
+        folder_button = QPushButton(
+            "Process Folder Images\nClick to select folder", self
+        )
         folder_button.clicked.connect(self.process_folder_images)
         self.layout.addWidget(folder_button)
-        
+
         show_not_found_button = QPushButton("Show images not found", self)
         show_not_found_button.clicked.connect(self.show_not_found_popup)
         self.layout.addWidget(show_not_found_button)
@@ -161,7 +180,9 @@ class ImageProcessingWidget(BaseProcessingWidget):
 
         # Remove fixed height from not_found_listbox and use sizePolicy instead
         self.not_found_listbox = QListWidget(self)
-        self.not_found_listbox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.not_found_listbox.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding
+        )
         self.not_found_listbox.setMinimumHeight(100)
         self.layout.addWidget(self.not_found_listbox)
 
@@ -189,7 +210,7 @@ class ImageProcessingWidget(BaseProcessingWidget):
         msg_box.setIcon(icon)
         msg_box.setWindowTitle(title)
         msg_box.setText(message)
-        msg_box.exec_()   
+        msg_box.exec_()
 
     def shorten_path_in_message(self, message):
         """Shorten the path in a message to show only the last part of the path."""
@@ -202,7 +223,7 @@ class ImageProcessingWidget(BaseProcessingWidget):
         """Show a pop-up window with the list of search terms not found."""
         if not self.not_found_list:
             self.show_message_box("Images Not Found", "No images were not found.")
-        else:  
+        else:
             not_found_str = "\n".join(self.not_found_list)
             self.show_message_box("Images Not Found", not_found_str)
 
@@ -212,27 +233,37 @@ class ImageProcessingWidget(BaseProcessingWidget):
         search_terms = self.entry.text()
         if not self.validate_search_terms(search_terms):
             return
-        
+
         search_groups = [group.strip() for group in search_terms.split(";")]
 
-        folder_to_search = QFileDialog.getExistingDirectory(self, "Välj mapp att söka i")
+        folder_to_search = QFileDialog.getExistingDirectory(
+            self, "Välj mapp att söka i"
+        )
         destination_folder = QFileDialog.getExistingDirectory(self, "Välj målplats")
 
         if not folder_to_search or not destination_folder:
             self.show_message_box("Warning", "No folder selected.", QMessageBox.Warning)
             return
-        
+
         for group in search_groups:
             search_terms_list = [term.strip() for term in group.split(",")]
-            print(f"Processing group: {search_terms_list}")  # Debugging to check which group is being processed
-            group_folder_name = search_terms_list[0]  # Use the first search term as the group folder name
-            group_destination_folder = os.path.join(destination_folder, group_folder_name)
+            print(
+                f"Processing group: {search_terms_list}"
+            )  # Debugging to check which group is being processed
+            group_folder_name = search_terms_list[
+                0
+            ]  # Use the first search term as the group folder name
+            group_destination_folder = os.path.join(
+                destination_folder, group_folder_name
+            )
 
             if not os.path.exists(group_destination_folder):
                 os.makedirs(group_destination_folder)
 
             # Process images using the search terms and folders
-            self.image_handler.process_images_by_search_terms(search_terms_list, folder_to_search, group_destination_folder)
+            self.image_handler.process_images_by_search_terms(
+                search_terms_list, folder_to_search, group_destination_folder
+            )
 
     def process_folder_images(self):
         """Process all images in a selected folder and subfolders."""
@@ -241,40 +272,56 @@ class ImageProcessingWidget(BaseProcessingWidget):
         if not folder_path:
             self.show_message_box("Warning", "No folder selected.", QMessageBox.Warning)
             return
-        
+
         destination_folder = QFileDialog.getExistingDirectory(self, "Välj målplats")
         if not destination_folder:
-            self.show_message_box("Warning", "No destination folder selected.", QMessageBox.Warning)
+            self.show_message_box(
+                "Warning", "No destination folder selected.", QMessageBox.Warning
+            )
             return
         self.file_listbox.addItem(f"Processing folder: {folder_path}")
 
         try:
             for root, dirs, files in os.walk(folder_path):
                 for file in files:
-                    if file.lower().endswith((".jpg", ".jpeg", ".png", ".tiff", ".tif", ".webp")):
+                    if file.lower().endswith(
+                        (".jpg", ".jpeg", ".png", ".tiff", ".tif", ".webp")
+                    ):
                         image_path = os.path.join(root, file)
                         relative_path = os.path.relpath(root, folder_path)
-                        destination_dir = os.path.join(destination_folder, relative_path)
+                        destination_dir = os.path.join(
+                            destination_folder, relative_path
+                        )
                         os.makedirs(destination_dir, exist_ok=True)
 
                         self.file_listbox.addItem(f"Processing image: {image_path}")
-                        self.image_handler.process_and_save_image(image_path, destination_dir)
+                        self.image_handler.process_and_save_image(
+                            image_path, destination_dir
+                        )
                         self.file_listbox.addItem("Processing complete")
             self.add_to_listbox("All images processed")
         except Exception as e:
-            self.add_to_listbox(f"Error processing folder: {str(e)}")  # Add error message to the listbox
-            self.show_message_box("Error", f"Error processing folder: {str(e)}", QMessageBox.Critical)  # Show error message box
+            self.add_to_listbox(
+                f"Error processing folder: {str(e)}"
+            )  # Add error message to the listbox
+            self.show_message_box(
+                "Error", f"Error processing folder: {str(e)}", QMessageBox.Critical
+            )  # Show error message box
 
     def validate_search_terms(self, search_terms):
         """Validate the search terms entered by the user."""
         if not search_terms:
-            self.show_message_box("Warning", "No search terms entered.", QMessageBox.Warning)  # Show warning message box
+            self.show_message_box(
+                "Warning", "No search terms entered.", QMessageBox.Warning
+            )  # Show warning message box
             return False
         return True
 
     def generate_unique_filename(self, destination_folder, filename, suffix):
         """Generate a unique filename by adding a suffix and incrementing a counter if needed."""
-        return self.image_handler.generate_unique_filename(destination_folder, filename, suffix)
+        return self.image_handler.generate_unique_filename(
+            destination_folder, filename, suffix
+        )
 
     def delete_empty_group_folder(self, folder_path):
         """Delete the group folder if it is empty."""
@@ -282,15 +329,15 @@ class ImageProcessingWidget(BaseProcessingWidget):
 
     def resize_image_if_needed(self, img, filename):
         """Resize image if it is larger than 2500 pixels in width or height and with a dpi higher than 150. Or flag low resolution images.
-        Keep the aspect ratio and use Lanczos resampling for resizing. And keep the original DPI."""
+        Keep the aspect ratio and use Lanczos resampling for resizing. And keep the original DPI.
+        """
         return self.image_handler.resize_image_if_needed(img, filename)
 
     def convert_image_mode(self, img, file_path):
-        """Convert the image mode to RGB if needed. 
+        """Convert the image mode to RGB if needed.
         Using ICC profile if available and handling transparency."""
         return self.image_handler.convert_image_mode(img, file_path)
 
     def process_image(self, img, file_path):
         """Handle all image processing steps."""
         return self.image_handler.process_image(img, file_path)
-

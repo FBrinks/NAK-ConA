@@ -13,8 +13,6 @@ logging.getLogger("pdf2image").setLevel(logging.WARNING)
 logging.getLogger("pdf2image").propagate = False
 
 
-
-
 # Function to clean text and remove duplicates
 def function_clean_text(text):
     seen = set()
@@ -32,13 +30,14 @@ def search_pdf_advanced(pdf, doc, search_term):
     if not isinstance(search_term, list):
         search_term = [search_term]
     print(f"search_pdf_advanced: Searching for search terms: {search_term}")
-    
+
     extracted_data = []
     search_terms_not_found = {}
+    search_interrupted = False
 
     try:
         print(f"search_pdf_advanced: Processing PDF with {len(pdf.pages)} pages")
-        
+
         for page_num, page in enumerate(pdf.pages):
             print(f"search_pdf_advanced: Processing page {page_num + 1}")
             found_text = ""
@@ -50,9 +49,11 @@ def search_pdf_advanced(pdf, doc, search_term):
 
                 # Extract text using different methods
                 text_sources = {
-                    'pdfplumber': lambda: page.extract_text(),
-                    'pytesseract': lambda: pytesseract.image_to_string(page.to_image().original),
-                    'pymupdf': lambda: doc.load_page(page_num).get_text("text")
+                    "pdfplumber": lambda: page.extract_text(),
+                    "pytesseract": lambda: pytesseract.image_to_string(
+                        page.to_image().original
+                    ),
+                    "pymupdf": lambda: doc.load_page(page_num).get_text("text"),
                 }
 
                 for source_name, extract_func in text_sources.items():
@@ -68,26 +69,33 @@ def search_pdf_advanced(pdf, doc, search_term):
                     missing_terms.append(term)
 
             if found_text:
-                print(f"search_pdf_advanced: Found match for '{term}' on page {page_num + 1}")
-                extracted_data.append({
-                    "page_num": page_num + 1,
-                    "combined_text": function_clean_text(found_text)
-                })
-            
+                print(
+                    f"search_pdf_advanced: Found match for '{term}' on page {page_num + 1}"
+                )
+                extracted_data.append(
+                    {
+                        "page_num": page_num + 1,
+                        "combined_text": function_clean_text(found_text),
+                    }
+                )
+
             if missing_terms:
                 search_terms_not_found[page_num + 1] = missing_terms
+                search_interrupted = True
 
         print("search_pdf_advanced: PDF processing complete")
         return {
             "extracted_data": extracted_data,
-            "keywords_not_found": search_terms_not_found  # keeping this key name for compatibility
+            "keywords_not_found": search_terms_not_found,
+            "search_interrupted": search_interrupted,
         }
 
     except Exception as e:
         print(f"search_pdf_advanced: Error processing PDF - {str(e)}")
         return {
             "extracted_data": [],
-            "keywords_not_found": {1: search_term}  # keeping this key name for compatibility
+            "keywords_not_found": {1: search_term},
+            "search_interrupted": True,
         }
 
 
@@ -98,15 +106,17 @@ def process_combined_results(extracted_data):
 
     # Loop through the extracted data and make sure each item is a dictionary
     for result in extracted_data:
-        if isinstance(result, dict) and 'page_num' in result and 'combined_text' in result:
+        if (
+            isinstance(result, dict)
+            and "page_num" in result
+            and "combined_text" in result
+        ):
             # Safely access the dictionary elements
             full_extracted_search_results += f"--- Page {result['page_num']} ---\n"
             full_extracted_search_results += result["combined_text"] + "\n"
         else:
             # If the result is not in the expected format, log an error and continue
             print(f"Unexpected result format: {result}")
-    
+
     print("process_combined_results function ended.")
     return full_extracted_search_results
-
-

@@ -1,3 +1,7 @@
+"""Keeping this file as a structure for handling database queries and OpenAI API calls for generating product descriptions.
+Directly from the database, the product information is fetched and passed to the OpenAI API for generating product descriptions.
+It is not updated to the latest version of the main.py file, but it can be used as a reference for implementing the functionality in the main application."""
+
 import os
 import sqlite3
 import openai
@@ -9,11 +13,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# Hämta API-nyckel och databaskonfigurationer från miljövariabler
-api_key = os.getenv("OPENAI_API_KEY")
-db_name = os.getenv("DB_NAME", "products")
-
-openai.api_key = api_key
+# Set up OpenAI API and database connection
+openai.api_key = os.getenv("OPENAI_API_KEY")
+DB_NAME = os.getenv("DB_NAME", "products")
 
 class ProductDescriptionGenerator: # OpenAIHandler for generating product descriptions
     def __init__(self):
@@ -126,7 +128,7 @@ class ProductDescriptionGenerator: # OpenAIHandler for generating product descri
 class DatabaseQueryHandler: # OpenAIHandler for connecting to the database and fetching product information to generate descriptions
     def __init__(self):
         try:
-            self.connection = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', f'{db_name}.db'))
+            self.connection = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', f'{DB_NAME}.db'))
             logging.info("Database connection established successfully.")
         except Exception as e:
             logging.error(f"Error connecting to the database: {e}")

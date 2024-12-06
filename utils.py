@@ -1,7 +1,8 @@
 # utils.py
 
 import pandas as pd
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QMessageBox
+
 
 class SaveToFile:
     def save_search_to_excel(self, data, file_path):
@@ -11,6 +12,7 @@ class SaveToFile:
             QMessageBox.information(None, "Success", "Data saved successfully!")
         except Exception as e:
             QMessageBox.critical(None, "Error", f"Failed to save data: {e}")
+
 
 def clean_searchresults_from_filesearches(search_results):
     cleaned_results = []

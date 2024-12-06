@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
-from PyQt5.QtCore import Qt
 
 class BaseProcessingWidget(QWidget):
     def __init__(self):
@@ -11,7 +10,8 @@ class BaseProcessingWidget(QWidget):
         self.apply_base_styles()
 
     def apply_base_styles(self):
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QWidget {
                 background-color: #f5f5f5;
                 font-family: Arial;
@@ -56,4 +56,5 @@ class BaseProcessingWidget(QWidget):
                 border: 1px solid #bdc3c7;
                 border-radius: 4px;
             }
-        """)
+        """
+        )
